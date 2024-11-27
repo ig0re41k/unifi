@@ -7,3 +7,4 @@
 .factorypath
 .settings/
 bin/
+.DS_Store
