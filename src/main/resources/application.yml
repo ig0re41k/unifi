@@ -1,0 +1,67 @@
+server:
+    port: 8088
+unifi:
+    httpClient:
+        timeout: 30_000
+    retry:
+        delay: 3
+        duration: 300
+        retries: 5
+    site:
+        name: ${unifi_site}
+        host: unifi
+        credentials:
+            username: ${unifi_username}
+            password: ${unifi_password}
+    security:
+        admin:
+            username: admin
+            password: $2a$12$p6uM2P2i1PEw6eTT4Wlq8uYXkJbY4zDLKFe89uIjV0jc3VMQEdN6C
+        access:
+            api:
+                - /v2/**
+            whitelist:
+                - /v1/**
+                - /actuator/metrics
+                - /actuator/threaddump
+                - /actuator/health
+                - /swagger-ui/**
+                - /swagger-resources/**
+                - /v2/api-docs
+                - /webjars/**
+                - /**/*.css
+                - /**/*.map
+                - /**/*.js
+                - /**/*.jpg
+                - /**/*.png
+                - /**/*.woff2
+                - /**/*.ico
+                - /**/*.ttf
+
+management:
+    server:
+        port: 8089
+    metrics:
+        enable:
+            jvm: true
+    endpoints:
+        web:
+            exposure:
+                include: prometheus,metrics,threaddump,health
+    health:
+        db:
+            enabled: false
+
+spring:
+    boot:
+        main:
+            class: com.ig0re4.unifi.Application
+    main:
+        allow-bean-definition-overriding: true
+    banner:
+        location: banner.txt
+    webflux:
+        date-format: yyyy-MM-dd'T'HH:mm:ss.SSS
+        hiddenmethod:
+            filter:
+                enabled: true

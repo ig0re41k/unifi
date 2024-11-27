@@ -1,0 +1,18 @@
+${Ansi.GREEN} UUUUUUUU     UUUUUUUNNNNNNNN        NNNNNNNIIIIIIIIIFFFFFFFFFFFFFFFFFFFFFIIIIIIIIII
+${Ansi.GREEN} U::::::U     U::::::N:::::::N       N::::::I::::::::F::::::::::::::::::::I::::::::I
+${Ansi.GREEN} U::::::U     U::::::N::::::::N      N::::::I::::::::F::::::::::::::::::::I::::::::I
+${Ansi.GREEN} UU:::::U     U:::::UN:::::::::N     N::::::II::::::IFF::::::FFFFFFFFF::::II::::::II
+${Ansi.GREEN}  U:::::U     U:::::UN::::::::::N    N::::::N I::::I   F:::::F       FFFFFF I::::I
+${Ansi.GREEN}  U:::::D     D:::::UN:::::::::::N   N::::::N I::::I   F:::::F              I::::I
+${Ansi.GREEN}  U:::::D     D:::::UN:::::::N::::N  N::::::N I::::I   F::::::FFFFFFFFFF    I::::I
+${Ansi.GREEN}  U:::::D     D:::::UN::::::N N::::N N::::::N I::::I   F:::::::::::::::F    I::::I
+${Ansi.GREEN}  U:::::D     D:::::UN::::::N  N::::N:::::::N I::::I   F:::::::::::::::F    I::::I
+${Ansi.GREEN}  U:::::D     D:::::UN::::::N   N:::::::::::N I::::I   F::::::FFFFFFFFFF    I::::I
+${Ansi.GREEN}  U:::::D     D:::::UN::::::N    N::::::::::N I::::I   F:::::F              I::::I
+${Ansi.GREEN}  U::::::U   U::::::UN::::::N     N:::::::::N I::::I   F:::::F              I::::I
+${Ansi.GREEN}  U:::::::UUU:::::::UN::::::N      N::::::::II::::::IFF:::::::FF          II::::::II
+${Ansi.GREEN}   UU:::::::::::::UU N::::::N       N:::::::I::::::::F::::::::FF          I::::::::I
+${Ansi.GREEN}     UU:::::::::UU   N::::::N        N::::::I::::::::F::::::::FF          I::::::::I
+${Ansi.GREEN}       UUUUUUUUU     NNNNNNNN         NNNNNNIIIIIIIIIFFFFFFFFFFF          IIIIIIIIII
+
+${Ansi.RED} :: Spring Boot${spring-boot.formatted-version} :: ${Ansi.DEFAULT}
