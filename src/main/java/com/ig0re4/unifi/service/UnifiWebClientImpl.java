@@ -16,14 +16,16 @@ public class UnifiWebClientImpl
     public <T> Mono<T> getMono(ParameterizedTypeReference<T> reference, String endpoint){
         return getCookies()
                 .flatMap(cookies -> getMono(endpoint, cookies,
-                        response -> response.bodyToMono(reference)));
+                        response -> response.bodyToMono(reference)))
+                .onErrorResume(Mono::error);
     }
 
     @Override
     public <T> Flux<T> getFlux(ParameterizedTypeReference<T> reference, String endpoint){
         return getCookies()
             .flatMapMany(cookies -> getFlux(endpoint, cookies,
-            response -> response.bodyToFlux(reference)));
+            response -> response.bodyToFlux(reference)))
+                .onErrorResume(Mono::error);
     }
 
     @Override
@@ -31,7 +33,8 @@ public class UnifiWebClientImpl
         return getCookies()
             .flatMap(cookie -> getXsrfToken(cookie)
                 .flatMap(xsrfToken -> postMono(endpoint, body, cookie, xsrfToken,
-            response -> response.bodyToMono(reference))));
+            response -> response.bodyToMono(reference))))
+                .onErrorResume(Mono::error);
     }
 
     @Override
@@ -39,6 +42,7 @@ public class UnifiWebClientImpl
         return getCookies()
             .flatMap(cookie -> getXsrfToken(cookie)
                 .flatMap(xsrfToken -> putMono(endpoint, body, cookie, xsrfToken,
-                response -> response.bodyToMono(reference))));
+                response -> response.bodyToMono(reference))))
+                .onErrorResume(Mono::error);
     }
 }

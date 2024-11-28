@@ -11,12 +11,16 @@ unifi:
         name: ${unifi_site}
         host: unifi
         credentials:
-            username: ${unifi_username}
-            password: ${unifi_password}
+            username: ${unifi_site_username}
+            password: ${unifi_site_password}
+        reconnect:
+            exclude:
+                - 80:65:7c:e8:4e:b3
+                - 00:a5:54:3d:fb:53
     security:
         admin:
-            username: admin
-            password: $2a$12$p6uM2P2i1PEw6eTT4Wlq8uYXkJbY4zDLKFe89uIjV0jc3VMQEdN6C
+            username: ${unifi_username}
+            password: ${unifi_password}
         access:
             api:
                 - /v2/**

@@ -256,7 +256,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>com.ig0re4.vpn.Application</mainClass>
+							<mainClass>com.ig0re4.unifi.Application</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

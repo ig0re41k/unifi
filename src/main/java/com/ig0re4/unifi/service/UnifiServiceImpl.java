@@ -1,14 +1,27 @@
 package com.ig0re4.unifi.service;
 
 
+import com.google.common.collect.Lists;
 import com.ig0re4.unifi.model.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import javax.annotation.PostConstruct;
+import java.net.NetworkInterface;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.ig0re4.unifi.model.VpnStatus.on;
 import static com.ig0re4.unifi.util.Constants.*;
@@ -18,8 +31,28 @@ import static com.ig0re4.unifi.util.Constants.*;
 public class UnifiServiceImpl
         implements UnifiService {
 
+    @Getter
+    @Setter
+    @Configuration
+    @NoArgsConstructor
+    @ConfigurationProperties(prefix = "unifi.site.reconnect")
+    private static class ExcludedMacAddresses {
+        List<String> exclude = Lists.newArrayList();
+    }
+
     @Autowired
     private UnifiWebClient unifiClient;
+
+    @Autowired
+    private ExcludedMacAddresses excluded;
+
+    private List<String> macAddresses;
+
+    @PostConstruct
+    public void init(){
+        macAddresses = Lists.newArrayList(getMyMacAddresses());
+        macAddresses.addAll(excluded.getExclude());
+    }
 
     @Override
     public Mono<String> health() {
@@ -54,8 +87,13 @@ public class UnifiServiceImpl
     @Override
     public Flux<UnifiResponse<UnifyEmpty>> reconnectAll() {
         return getClients()
-                .flatMap(response -> Flux.fromStream(response.getData().stream())
-                    .flatMap(this::reconnect));
+            .flatMap(response -> Flux.fromStream(response.getData().stream())
+            .filter(this::isNotMyClient)
+            .flatMap(this::reconnect));
+    }
+
+    private boolean isNotMyClient(UnifiNetworkClient client) {
+        return macAddresses.stream().noneMatch(mac -> mac.equalsIgnoreCase(client.getMac()));
     }
 
     @Override
@@ -81,4 +119,23 @@ public class UnifiServiceImpl
                 TRAFFIC_ROUTES_ENDPOINT + "/" + route.getId(),
                 route.setEnabled(status.equals(on)));
     }
+
+    @SneakyThrows
+    private List<String> getMyMacAddresses() {
+        return NetworkInterface.networkInterfaces()
+                .filter(nic -> null != getHardwareAddress(nic))
+                .map(nic -> {
+            ByteBuffer buffer = ByteBuffer.wrap(getHardwareAddress(nic));
+            return IntStream.generate(buffer::get)
+                    .limit(buffer.capacity())
+                    .mapToObj(b -> String.format("%02X",(byte)b))
+                    .collect(Collectors.joining(":"));
+        }).collect(Collectors.toList());
+    }
+
+    @SneakyThrows
+    private byte[] getHardwareAddress(NetworkInterface nic){
+        return nic.getHardwareAddress();
+    }
+
 }
