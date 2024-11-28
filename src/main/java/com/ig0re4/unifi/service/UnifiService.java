@@ -10,7 +10,7 @@ public interface UnifiService {
     Flux<UnifiResponse<UnifyEmpty>> reconnect(String name);
     Flux<UnifiResponse<UnifyEmpty>> reconnectAll();
     Flux<UnifiVpnRoute> getVpnStatus();
-    Flux<UnifiVpnRoute> setVpnStatus(Routes route, VpnStatus status);
+    Flux<UnifiVpnRoute> setVpnStatus(String route, VpnStatus status);
     Mono<String> health();
     Mono<String> ports();
 }

@@ -16,8 +16,8 @@ import static com.ig0re4.unifi.util.Constants.*;
 public class CookiesManager
         extends AbstractWebClient {
 
-    static final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
-    private LocalDateTime cookiesReceived = LocalDateTime.now();
+    private static final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
+    private LocalDateTime lastTimeUpdated;
 
     @Autowired
     private UnifiCredentials unifiCredentials;
@@ -44,7 +44,7 @@ public class CookiesManager
                    cookies,
                    "",
                    response -> {
-                cookiesReceived = LocalDateTime.now();
+                lastTimeUpdated = LocalDateTime.now();
                 cookies.clear();
                 cookies.putAll(response.cookies());
                 return Mono.just(cookies);
@@ -59,7 +59,7 @@ public class CookiesManager
     private boolean isAnyCookieExpired(){
         return cookies.values().stream().flatMap(cl ->
                         cl.stream().map(c ->
-                                cookiesReceived.plus(c.getMaxAge()).isBefore(LocalDateTime.now())))
+                                lastTimeUpdated.plus(c.getMaxAge()).isBefore(LocalDateTime.now())))
                 .findAny().orElse(false);
     }
 }
