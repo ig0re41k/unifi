@@ -43,12 +43,6 @@ java -jar unifi-1.0.1-SNAPSHOT.jar
 - verify application is loaded
 ![Screenshot1.png](docs/Screenshot1.png)
 
-### Download the Release
-
-If you prefer not to use composer or git,
-simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), unpack the zip
-file, then include the file containing the class in your code like so:
-
 ## Usage
 
 - open swagger page - http://localhost:8088/swagger-ui/#/ in browser.
