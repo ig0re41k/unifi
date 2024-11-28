@@ -82,8 +82,8 @@ public class UnifiController {
     @PutMapping("vpn/{route}/{status}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation(value = "set vpn on/off",
-            authorizations = { @Authorization(value="basicAuth") })
-    public Flux<UnifiVpnRoute> setVpnStatus(Routes route, VpnStatus status){
+            authorizations = { @Authorization(value="basicAuth")})
+    public Flux<UnifiVpnRoute> setVpnStatus(@PathVariable String route, @PathVariable VpnStatus status){
         return service.setVpnStatus(route, status);
     }
 }

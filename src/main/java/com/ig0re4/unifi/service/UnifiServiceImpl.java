@@ -64,10 +64,10 @@ public class UnifiServiceImpl
     }
 
     @Override
-    public Flux<UnifiVpnRoute> setVpnStatus(Routes route, VpnStatus status) {
+    public Flux<UnifiVpnRoute> setVpnStatus(String route, VpnStatus status) {
         return getVpnStatus()
                 .filter(uvr -> !StringUtils.isEmpty(uvr.getDescription()) &&
-                        route.getName().equals(uvr.getDescription()))
+                        route.equals(uvr.getDescription()))
                 .flatMap(uvr -> setVpnStatus(uvr, status));
     }
 

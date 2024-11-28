@@ -1,2 +1,2 @@
 # unifi
-spring boot application integrated with ubiquiti api
+Spring boot application integrated with Ubiquiti API
