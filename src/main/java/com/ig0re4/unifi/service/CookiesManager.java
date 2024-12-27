@@ -1,6 +1,7 @@
 package com.ig0re4.unifi.service;
 
-import com.ig0re4.unifi.model.UnifiCredentials;
+import com.ig0re4.unifi.config.UnifiCredentials;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static com.ig0re4.unifi.util.Constants.*;
 
+@Slf4j
 public class CookiesManager
         extends AbstractWebClient {
 
@@ -41,7 +43,7 @@ public class CookiesManager
     private Mono<MultiValueMap<String, ResponseCookie>> updateCookies(){
         return postMono(LOGIN_ENDPOINT,
                    unifiCredentials.toJson(),
-                   cookies,
+                   new LinkedMultiValueMap<>(),
                    "",
                    response -> {
                 lastTimeUpdated = LocalDateTime.now();
@@ -58,8 +60,13 @@ public class CookiesManager
 
     private boolean isAnyCookieExpired(){
         return cookies.values().stream().flatMap(cl ->
-                        cl.stream().map(c ->
-                                lastTimeUpdated.plus(c.getMaxAge()).isBefore(LocalDateTime.now())))
+                        cl.stream().map(c -> {
+                            boolean needToUpdateCookies = lastTimeUpdated.plus(c.getMaxAge()).isBefore(LocalDateTime.now());
+                            log.info("cookies age - {}", c.getMaxAge());
+                            log.info("last time update {}", lastTimeUpdated.toString());
+                            log.info("need to update {}", needToUpdateCookies);
+                            return needToUpdateCookies;
+                        }))
                 .findAny().orElse(false);
     }
 }

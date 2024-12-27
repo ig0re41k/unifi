@@ -56,22 +56,26 @@ public class UnifiServiceImpl
 
     @Override
     public Mono<String> health() {
-        return unifiClient.getMono(new ParameterizedTypeReference<>() {}, HEALTH_ENDPOINT);
+        return unifiClient.getMono(new ParameterizedTypeReference<String>() {}, HEALTH_ENDPOINT)
+                .onErrorResume(this::handleException);
     }
 
     @Override
     public Mono<String> ports() {
-        return unifiClient.getMono(new ParameterizedTypeReference<>() {}, PORT_FORWARD_ENDPOINT);
+        return unifiClient.getMono(new ParameterizedTypeReference<String>() {}, PORT_FORWARD_ENDPOINT)
+                .onErrorResume(this::handleException);
     }
 
     @Override
     public Flux<UnifiResponse<UnifiNetworkClient>> getClients() {
-        return unifiClient.getFlux(new ParameterizedTypeReference<>() {}, CLIENTS_ENDPOINT);
+        return unifiClient.getFlux(new ParameterizedTypeReference<UnifiResponse<UnifiNetworkClient>>() {}, CLIENTS_ENDPOINT)
+                .onErrorResume(this::handleException);
     }
 
     @Override
     public Flux<UnifiResponse<UnifiNetworkDevice>> getDevices() {
-        return unifiClient.getFlux(new ParameterizedTypeReference<>() {}, DEVICES_ENDPOINT);
+        return unifiClient.getFlux(new ParameterizedTypeReference<UnifiResponse<UnifiNetworkDevice>>() {}, DEVICES_ENDPOINT)
+                .onErrorResume(this::handleException);
     }
 
     @Override
@@ -81,7 +85,8 @@ public class UnifiServiceImpl
                 Flux.fromStream(response.getData().stream())
                     .filter(client -> !StringUtils.isEmpty(client.getName()) &&
                                 name.equals(client.getName()))
-                    .flatMap(this::reconnect));
+                    .flatMap(this::reconnect))
+            .onErrorResume(this::handleException);
     }
 
     @Override
@@ -89,35 +94,36 @@ public class UnifiServiceImpl
         return getClients()
             .flatMap(response -> Flux.fromStream(response.getData().stream())
             .filter(this::isNotMyClient)
-            .flatMap(this::reconnect));
-    }
-
-    private boolean isNotMyClient(UnifiNetworkClient client) {
-        return macAddresses.stream().noneMatch(mac -> mac.equalsIgnoreCase(client.getMac()));
+            .flatMap(this::reconnect))
+            .onErrorResume(this::handleException);
     }
 
     @Override
-    public Flux<UnifiVpnRoute> getVpnStatus() {
-        return unifiClient.getFlux(new ParameterizedTypeReference<>() {}, TRAFFIC_ROUTES_ENDPOINT);
+    public Flux<UnifiVpnRouteResponse> getVpnStatus() {
+        return unifiClient.getFlux(new ParameterizedTypeReference<UnifiVpnRouteRequest>() {}, TRAFFIC_ROUTES_ENDPOINT)
+                .flatMap(UnifiVpnRouteResponse::just)
+                .onErrorResume(this::handleException);
     }
 
     @Override
-    public Flux<UnifiVpnRoute> setVpnStatus(String route, VpnStatus status) {
+    public Flux<UnifiVpnRouteResponse> setVpnStatus(String route, VpnStatus status) {
         return getVpnStatus()
-                .filter(uvr -> !StringUtils.isEmpty(uvr.getDescription()) &&
-                        route.equals(uvr.getDescription()))
-                .flatMap(uvr -> setVpnStatus(uvr, status));
+                .filter(uvr -> !StringUtils.isEmpty(uvr.getName()) &&
+                        route.equals(uvr.getName()))
+                .flatMap(uvr -> setVpnStatus(uvr.getRequest(), status)
+                        .flatMap(UnifiVpnRouteResponse::just))
+                .onErrorResume(this::handleException);
+    }
+
+    private Mono<UnifiVpnRouteRequest> setVpnStatus(UnifiVpnRouteRequest request, VpnStatus status){
+        return unifiClient.putMono(new ParameterizedTypeReference<>() {},
+                TRAFFIC_ROUTES_ENDPOINT + "/" + request.getId(),
+                request.setEnabled(status.equals(on)));
     }
 
     private Mono<UnifiResponse<UnifyEmpty>> reconnect(UnifiNetworkClient client){
         return unifiClient.postMono(new ParameterizedTypeReference<>() {}, RECONNECT_ENDPOINT,
                 UnifiRequest.just(client.getMac(), RECONNECT_CMD));
-    }
-
-    private Mono<UnifiVpnRoute> setVpnStatus(UnifiVpnRoute route, VpnStatus status){
-        return unifiClient.putMono(new ParameterizedTypeReference<>() {},
-                TRAFFIC_ROUTES_ENDPOINT + "/" + route.getId(),
-                route.setEnabled(status.equals(on)));
     }
 
     @SneakyThrows
@@ -138,4 +144,12 @@ public class UnifiServiceImpl
         return nic.getHardwareAddress();
     }
 
+    private boolean isNotMyClient(UnifiNetworkClient client) {
+        return macAddresses.stream().noneMatch(mac -> mac.equalsIgnoreCase(client.getMac()));
+    }
+
+    private <T> Mono<T> handleException(Throwable throwable){
+        log.error("Exception occurred", throwable);
+        return Mono.empty();
+    }
 }

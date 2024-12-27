@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @Getter
 @Accessors(chain = true)
-public class UnifiVpnRoute {
+public class UnifiVpnRouteRequest {
 
     private String description;
 

@@ -9,8 +9,8 @@ public interface UnifiService {
     Flux<UnifiResponse<UnifiNetworkDevice>> getDevices();
     Flux<UnifiResponse<UnifyEmpty>> reconnect(String name);
     Flux<UnifiResponse<UnifyEmpty>> reconnectAll();
-    Flux<UnifiVpnRoute> getVpnStatus();
-    Flux<UnifiVpnRoute> setVpnStatus(String route, VpnStatus status);
+    Flux<UnifiVpnRouteResponse> getVpnStatus();
+    Flux<UnifiVpnRouteResponse> setVpnStatus(String route, VpnStatus status);
     Mono<String> health();
     Mono<String> ports();
 }

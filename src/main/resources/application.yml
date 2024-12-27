@@ -1,5 +1,16 @@
 server:
-    port: 8088
+    port: 8090
+image:
+    support:
+        - bmp
+        - gif
+        - jpeg
+        - jpg
+        - png
+        - psd
+        - pspimage
+        - thm
+        - tif
 unifi:
     httpClient:
         timeout: 30_000
@@ -44,7 +55,7 @@ unifi:
 
 management:
     server:
-        port: 8089
+        port: 8091
     metrics:
         enable:
             jvm: true

@@ -5,12 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 
 import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
@@ -88,6 +92,29 @@ public class Utils {
 
     private static String replacement(int length) {
         return new String(new char[length]).replace(REPLACE, MASK);
+    }
+
+    public static boolean isSimilar(String first, String second, int maxDifference) {
+        final AtomicInteger diffCount = new AtomicInteger(0);
+        return zip(first.chars(), second.chars(), (e1, e2) ->
+                Optional.of(diffCount)
+                        .filter(diff -> !e1.equals(e2))
+                        .map(diff -> diff.incrementAndGet() <= maxDifference)
+                        .orElse(true))
+                .allMatch(b -> b);
+    }
+
+    public static Stream<Boolean> zip(IntStream leftStream, IntStream rightStream, BiFunction<Integer, Integer, Boolean> combiner) {
+        Spliterator.OfInt lefts = leftStream.spliterator();
+        Spliterator.OfInt rights = rightStream.spliterator();
+        return StreamSupport.stream(new Spliterators.AbstractSpliterator<>(Long.min(lefts.estimateSize(), rights.estimateSize()),
+                lefts.characteristics() & rights.characteristics()) {
+            @Override
+            public boolean tryAdvance(Consumer<? super Boolean> action) {
+                return lefts.tryAdvance((IntConsumer) left -> rights.tryAdvance((IntConsumer) right ->
+                        action.accept(combiner.apply(left, right))));
+            }
+        }, leftStream.isParallel() || rightStream.isParallel());
     }
 
 }
