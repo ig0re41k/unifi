@@ -1,4 +1,4 @@
-package com.ig0re4.unifi.model;
+package com.ig0re4.unifi.config;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
